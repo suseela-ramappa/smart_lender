@@ -52,6 +52,7 @@ smart-lender/
    python app.py
    ```
 7. Open your browser at **http://127.0.0.1:5000** and try a prediction.
+8. **here is the live link**  https://smart-lender.onrender.com
 
 ## Using a real dataset instead of the synthetic one
 
