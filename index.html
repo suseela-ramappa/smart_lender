@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart Lender - Loan Approval Prediction</title>
+<style>
+  :root {
+    --primary: #1e3a5f;
+    --accent: #2f80ed;
+    --approved: #1e8e3e;
+    --rejected: #c0392b;
+    --bg: #f4f6f9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    color: #222;
+  }
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 24px 32px;
+  }
+  header h1 { margin: 0; font-size: 1.6rem; }
+  header p { margin: 4px 0 0; opacity: 0.85; font-size: 0.9rem; }
+  .container {
+    max-width: 760px;
+    margin: 32px auto;
+    background: white;
+    border-radius: 10px;
+    padding: 28px 32px 36px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+  .field { display: flex; flex-direction: column; }
+  label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #444; }
+  select, input {
+    padding: 9px 10px;
+    border: 1px solid #d0d5dd;
+    border-radius: 6px;
+    font-size: 0.92rem;
+  }
+  .full { grid-column: 1 / -1; }
+  button {
+    grid-column: 1 / -1;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  button:hover { background: #256fd1; }
+  .result {
+    margin-top: 24px;
+    padding: 18px 20px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .approved { background: #e6f4ea; color: var(--approved); border: 1px solid #b7e1c3; }
+  .rejected { background: #fdecea; color: var(--rejected); border: 1px solid #f3c2bd; }
+  .error { background: #fff4e5; color: #9a6700; border: 1px solid #ffe0a3; }
+  .meta { font-size: 0.85rem; color: #666; margin-top: 6px; font-weight: 400; }
+  footer { text-align: center; color: #888; font-size: 0.8rem; margin: 30px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Smart Lender</h1>
+  <p>ML-powered loan eligibility &amp; credit risk prediction &middot; Model in use: {{ model_name }}</p>
+</header>
+
+<div class="container">
+  <form method="POST" action="/predict">
+
+    <div class="field">
+      <label>Gender</label>
+      <select name="Gender" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Married</label>
+      <select name="Married" required>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Dependents</label>
+      <select name="Dependents" required>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3+">3+</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Education</label>
+      <select name="Education" required>
+        <option value="Graduate">Graduate</option>
+        <option value="Not Graduate">Not Graduate</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Self Employed</label>
+      <select name="Self_Employed" required>
+        <option value="No">No</option>
+        <option value="Yes">Yes</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Property Area</label>
+      <select name="Property_Area" required>
+        <option value="Urban">Urban</option>
+        <option value="Semiurban">Semiurban</option>
+        <option value="Rural">Rural</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Applicant Income (monthly)</label>
+      <input type="number" name="ApplicantIncome" min="0" step="1" required>
+    </div>
+
+    <div class="field">
+      <label>Coapplicant Income (monthly)</label>
+      <input type="number" name="CoapplicantIncome" min="0" step="1" value="0" required>
+    </div>
+
+    <div class="field">
+      <label>Loan Amount (in thousands)</label>
+      <input type="number" name="LoanAmount" min="0" step="1" required>
+    </div>
+
+    <div class="field">
+      <label>Loan Term (days)</label>
+      <select name="Loan_Amount_Term" required>
+        <option value="360">360</option>
+        <option value="180">180</option>
+        <option value="120">120</option>
+        <option value="60">60</option>
+      </select>
+    </div>
+
+    <div class="field full">
+      <label>Credit History</label>
+      <select name="Credit_History" required>
+        <option value="1.0">Good (1)</option>
+        <option value="0.0">Poor / None (0)</option>
+      </select>
+    </div>
+
+    <button type="submit">Predict Loan Eligibility</button>
+  </form>
+
+  {% if result %}
+    <div class="result {{ 'approved' if result == 'Approved' else 'rejected' }}">
+      Prediction: {{ result }}
+      <div class="meta">Model confidence: {{ confidence }} &middot; Model used: {{ model_name }}</div>
+    </div>
+  {% endif %}
+
+  {% if error %}
+    <div class="result error">Error: {{ error }}</div>
+  {% endif %}
+</div>
+
+<footer>Smart Lender &middot; Built with Python, Flask &amp; XGBoost</footer>
+
+</body>
+</html>
